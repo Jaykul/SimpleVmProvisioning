@@ -71,6 +71,8 @@ if (!$ResourceGroup) {
     Write-Host "Using existing resource group '$ResourceGroupName'"
 }
 
+$KeyVault = .\Initialize-ResourceGroup.ps1 -SubscriptionID $SubscriptionId -ResourceGroupName $ResourceGroupName -Location $ResourceGroupLocation
+
 $Parameters = @{
     Name                = $DeploymentName
     ResourceGroupName   = $ResourceGroupName
@@ -79,6 +81,9 @@ $Parameters = @{
     AdminUsername       = $VmAdminCredential.UserName
     AdminPassword       = $VmAdminCredential.Password
     VirtualMachineName  = $VirtualMachineName
+    KeyVaultUrl         = $KeyVault.VaultUri
+    KeyVaultName        = $KeyVault.Vaultname
+    KeyEncryptionKeyUrl = $KeyVault.KeyEncryptionKeyUrl
 }
 
 if (Test-Path $parametersFilePath) {

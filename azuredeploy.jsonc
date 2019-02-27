@@ -40,6 +40,15 @@
         },
         "diagnosticsStorageAccountKind": {
             "type": "string"
+        },
+        "keyVaultUrl": {
+            "type": "string"
+        },
+        "keyVaultName": {
+            "type": "string"
+        },
+        "keyEncryptionKeyUrl": {
+            "type": "string"
         }
     },
     "variables": {
@@ -202,6 +211,38 @@
                 "CreatedBy": "Joel Bennett",
                 "DeleteBy": "2019-04-01",
                 "Purpose": "R&D"
+            }
+        },
+        {
+            "name": "[concat(deployment().name,'-EncryptVM')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/Jaykul/SimpleVmProvisioning/master/partial/EncryptVM.jsonc",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[parameters('virtualMachineName')]"
+                    },
+                    "keyVaultName": {
+                        "value": "[parameters('keyVaultName')]"
+                    },
+                    "keyVaultResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "keyVaultUrl": {
+                        "value": "[parameters('keyVaultUrl')]"
+                    },
+                    "keyEncryptionKeyURL": {
+                        "value": "[parameters('keyEncryptionKeyUrl')]"
+                    }
+                }
             }
         }
     ],
