@@ -67,11 +67,11 @@ if (!$ResourceGroup) {
         Write-Warning "To create a new resource group, please provide a location."
         $ResourceGroupLocation = Read-Host "resourceGroupLocation"
     }
+    Write-Host "Creating new resource group:  ($ResourceGroup)"
+    $ResourceGroup = New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation
 } else {
     Write-Host "Using existing resource group '$ResourceGroupName'"
 }
-
-$KeyVault = .\Initialize-ResourceGroup.ps1 -SubscriptionID $SubscriptionId -ResourceGroupName $ResourceGroupName -Location $ResourceGroupLocation
 
 $Parameters = @{
     Name                = $DeploymentName
@@ -81,9 +81,7 @@ $Parameters = @{
     AdminUsername       = $VmAdminCredential.UserName
     AdminPassword       = $VmAdminCredential.Password
     VirtualMachineName  = $VirtualMachineName
-    KeyVaultUrl         = $KeyVault.VaultUri
-    KeyVaultName        = $KeyVault.Vaultname
-    KeyEncryptionKeyUrl = $KeyVault.KeyEncryptionKeyUrl
+    KeyVaultName        = $ResourceGroupName + "-dekv"
 }
 
 if (Test-Path $parametersFilePath) {

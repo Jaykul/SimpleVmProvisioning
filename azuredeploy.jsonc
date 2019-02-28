@@ -41,20 +41,14 @@
         "diagnosticsStorageAccountKind": {
             "type": "string"
         },
-        "keyVaultUrl": {
-            "type": "string"
-        },
         "keyVaultName": {
-            "type": "string"
-        },
-        "keyEncryptionKeyUrl": {
             "type": "string"
         },
         "keyVaultTenant": {
             "type": "string",
             "defaultValue": "[subscription().tenantId]",
             "metadata": {
-                "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+                "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault."
             }
         }
     },
@@ -93,6 +87,7 @@
                 "enableSoftDelete": true,
                 "enabledForDiskEncryption": true,
                 "tenantId": "[parameters('keyVaultTenant')]",
+                "accessPolicies": [],
                 "sku": {
                     "name": "standard",
                     "family": "A"
@@ -100,14 +95,14 @@
             }
         },
         {
-            "type": "Microsoft.KeyVault/vaults/keys",
-            "name": "[concat(parameters('keyVaultName'), '/kek')]",
-            "apiVersion": "2018-02-14",
+            "type": "Microsoft.KeyVault/vaults/providers/locks",
+            "name": "[concat(parameters('keyVaultName'), '/Microsoft.Authorization/keyVaultDoNotDelete')]",
+            "apiVersion": "2016-09-01",
             "dependsOn": [
                 "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
             ],
             "properties": {
-                "name": "KeK"
+                "level": "CannotDelete"
             }
         },
         {
@@ -254,29 +249,21 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]",
+                "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/Jaykul/SimpleVmProvisioning/master/partial/EncryptVM.jsonc",
+                    "uri": "https://raw.githubusercontent.com/Jaykul/SimpleVmProvisioning/noKEK/partial/EncryptVM.jsonc",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "vmName": {
                         "value": "[parameters('virtualMachineName')]"
                     },
-                    "keyVaultName": {
-                        "value": "[parameters('keyVaultName')]"
-                    },
-                    "keyVaultResourceGroup": {
-                        "value": "[resourceGroup().name]"
-                    },
-                    "keyVaultUrl": {
-                        "value": "[parameters('keyVaultUrl')]"
-                    },
-                    "keyEncryptionKeyURL": {
-                        "value": "[parameters('keyEncryptionKeyUrl')]"
+                    "keyVaultId": {
+                        "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
                     }
                 }
             }

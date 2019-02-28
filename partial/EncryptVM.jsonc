@@ -8,54 +8,31 @@
                 "description": "Name of the virtual machine"
             }
         },
-        "keyVaultName": {
+        "keyVaultId": {
             "type": "string",
             "metadata": {
-                "description": "Name of the KeyVault to place the volume encryption key"
-            }
-        },
-        "keyVaultResourceGroup": {
-            "type": "string",
-            "metadata": {
-                "description": "Resource group of the KeyVault"
-            }
-        },
-        "keyVaultUrl": {
-            "type": "string",
-            "metadata": {
-                "description": "Resource group of the KeyVault"
-            }
-        },
-        "keyEncryptionKeyURL": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "URL of the KeyEncryptionKey used to encrypt the volume encryption key"
-            }
-        },
-        "sequenceVersion": {
-            "type": "string",
-            "defaultValue": "3",
-            "metadata": {
-                "description": "Pass in an unique value like a GUID everytime the operation needs to be force run"
+                "description": "The resource Id of the KeyVault to place the volume encryption key"
             }
         },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
             "metadata": {
-                "description": "Location for all resources."
+                "description": "The resource Id of the KeyVault to place the volume encryption key"
+            }
+        },
+        "sequenceVersion": {
+            "type": "string",
+            "defaultValue": "1.0",
+            "metadata": {
+                "description": "Pass in an unique value like a GUID everytime the operation needs to be force run"
             }
         }
-    },
-    "variables": {
-        "extensionName": "AzureDiskEncryption",
-        "keyVaultResourceID": "[concat(subscription().id,'/resourceGroups/',parameters('keyVaultResourceGroup'),'/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('vmName'),'/', variables('extensionName'))]",
+            "name": "[concat(parameters('vmName'),'/', 'AzureDiskEncryption')]",
             "apiVersion": "2018-10-01",
             "location": "[parameters('location')]",
             "properties": {
@@ -64,21 +41,13 @@
                 "typeHandlerVersion": "2.2",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                    "KeyVaultURL": "[parameters('keyVaultUrl')]",
-                    "KeyVaultResourceId": "[variables('keyVaultResourceID')]",
+                    "SequenceVersion": "[parameters('sequenceVersion')]",
+                    "KeyVaultURL": "[reference(parameters('keyVaultId'), '2018-02-14').properties.vaultUri]",
+                    "KeyVaultResourceId": "[parameters('keyVaultId')]",
                     "VolumeType": "All",
-                    "EncryptionOperation": "EnableEncryption",
-                    "KeyEncryptionKeyURL": "[parameters('keyEncryptionKeyURL')]",
-                    "KekVaultResourceId": "[variables('keyVaultResourceID')]",
-                    "KeyEncryptionAlgorithm": "RSA-OAEP"
+                    "EncryptionOperation": "EnableEncryption"
                 }
             }
         }
-    ],
-    "outputs": {
-        "BitLockerKey": {
-            "type": "string",
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/extensions',  parameters('vmName'), variables('extensionName'))).instanceView.statuses[0].message]"
-        }
-    }
+    ]
 }
