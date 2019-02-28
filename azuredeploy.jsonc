@@ -49,6 +49,13 @@
         },
         "keyEncryptionKeyUrl": {
             "type": "string"
+        },
+        "keyVaultTenant": {
+            "type": "string",
+            "defaultValue": "[subscription().tenantId]",
+            "metadata": {
+                "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+            }
         }
     },
     "variables": {
@@ -73,6 +80,35 @@
                 "name": "[parameters('diagnosticsStorageAccountType')]"
             },
             "tags": {}
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2018-02-14",
+            "tags": {
+                "displayName": "DiskEncryption KeyVault"
+            },
+            "properties": {
+                "enableSoftDelete": true,
+                "enabledForDiskEncryption": true,
+                "tenantId": "[parameters('keyVaultTenant')]",
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/keys",
+            "name": "[concat(parameters('keyVaultName'), '/kek')]",
+            "apiVersion": "2018-02-14",
+            "dependsOn": [
+                "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "name": "KeK"
+            }
         },
         {
             "name": "[variables('networkInterfaceName')]",
