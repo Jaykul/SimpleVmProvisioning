@@ -42,7 +42,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "SequenceVersion": "[parameters('sequenceVersion')]",
-                    "KeyVaultURL": "[reference(parameters('keyVaultId'), '2018-02-14').properties.vaultUri]",
+                    "KeyVaultURL": "[reference(parameters('keyVaultId'), '2018-02-14').vaultUri]",
                     "KeyVaultResourceId": "[parameters('keyVaultId')]",
                     "VolumeType": "All",
                     "EncryptionOperation": "EnableEncryption"
